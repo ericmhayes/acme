@@ -80,12 +80,43 @@ SLOs, monitors, and APM live, defined as code via its Terraform provider. We pag
 on exactly three things and route everything else to Slack, because alert fatigue
 is the real failure mode for a small on-call rotation.
 
+**SLOs and the three paging monitors.** Two SLOs are defined in code, both over a
+30-day window: **booking API availability at 99.9%** (successful booking API
+responses over total) and **reminder dispatch latency at 99%** (reminders sent
+within 15 minutes of target over total). Exactly three monitors page — via
+PagerDuty in prod, Slack in lower environments (gated by `enable_paging`):
+
+- **Reminder delivery failures** — more than 10 failed deliveries in 10 minutes. A
+  broken reminder pipeline breaks the core product promise.
+- **Booking API availability SLO fast burn** — error-budget burn rate above 14.4×
+  (1-hour long / 5-minute short window). Booking is failing fast enough to blow the
+  monthly budget.
+- **RDS unavailable or connections saturated** — database connections above 80 for
+  5 minutes. The database is the single source of truth; near saturation, every
+  path stalls.
+
+Everything else — DLQ not empty, sustained ECS CPU, low RDS free storage — routes
+to Slack by severity without paging, so a four-person on-call isn't woken for what
+can wait until morning.
+
 **WAF at seed stage.** Defensible specifically because the data is
 health-adjacent and sold on trust — AWS managed rule groups are cheap insurance
 against common web attacks on patient-facing booking pages, plus a single
 rate-based rule on the booking path to blunt abuse and scraping. WAF is enabled
 in staging and prod; dev omits it to save cost. We did not write further custom
 rules; that would be premature.
+
+**AWS, with GCP evaluated.** Both clouds were designed out before building; AWS was
+chosen because it's where every decision here can be defended under live
+discussion, and the brief invites picking the provider you're most comfortable
+with. The differences are structural, not blocking: GCP's **global VPC** plus
+org-policy guardrails would shrink the per-environment networking surface (no
+per-VPC interface endpoints, a centrally-enforced "no public database"), while
+**Cloud Run's** revision-based, scale-to-zero model would remove the ECS cluster,
+task definitions, and target groups — at the cost of a Serverless VPC connector to
+reach a private Cloud SQL. The full mapping, including the Pub/Sub reminder
+pipeline and Workload Identity Federation for CI, is in
+[docs/design-gcp.md](docs/design-gcp.md).
 
 ## 3. What was deliberately left out or kept simple, and why
 
@@ -185,6 +216,10 @@ separate SaaS bill and is called out on its own.
 | WAF (WebACL + 3 managed rule groups) | ~$15 | ~$15 |
 | Secrets Manager, ECR, CloudWatch logs, SQS, Scheduler | ~$30 | ~$25 |
 | **AWS subtotal** | **~$345** | **~$270** |
+
+> Non-prod ALB and WAF look off but aren't: the non-prod ALB line covers **two**
+> load balancers (dev and staging) against prod's one, and the non-prod WAF line
+> is **staging only** — dev omits WAF (see Section 2).
 
 Total AWS: **roughly $600–650/month** across all environments. **Datadog** adds
 roughly **$100–250/month** depending on host/APM volume. NAT gateways are the

@@ -18,9 +18,15 @@ variable "public_subnet_ids" {
   type        = list(string)
 }
 
-variable "certificate_arn" {
-  description = "ARN of the ACM certificate for the HTTPS listener."
+variable "domain_name" {
+  description = "Primary domain for the ACM certificate (e.g. acme-example.com)."
   type        = string
+}
+
+variable "subject_alternative_names" {
+  description = "Additional names on the ACM certificate (e.g. api./app. subdomains)."
+  type        = list(string)
+  default     = []
 }
 
 variable "enable_waf" {

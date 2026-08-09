@@ -26,3 +26,11 @@ db_max_allocated_storage = 500
 db_multi_az              = true
 db_backup_retention_days = 30
 db_deletion_protection   = true
+
+# Services
+api_desired_count    = 2
+web_desired_count    = 2
+worker_desired_count = 2
+
+# Observability
+datadog_enable_paging = true

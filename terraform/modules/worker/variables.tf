@@ -23,6 +23,12 @@ variable "private_subnet_ids" {
   type        = list(string)
 }
 
+variable "database_security_group_id" {
+  description = "Database security group to open Postgres ingress to."
+  type        = string
+  default     = ""
+}
+
 variable "image" {
   description = "Fully-qualified worker container image reference (ECR URL plus tag)."
   type        = string

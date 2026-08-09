@@ -68,6 +68,12 @@ variable "host_header" {
   type        = string
 }
 
+variable "database_security_group_id" {
+  description = "Database security group to open Postgres ingress to. Empty for services that don't reach the DB directly (e.g. the web app)."
+  type        = string
+  default     = ""
+}
+
 variable "listener_rule_priority" {
   description = "Priority for this service's listener rule (unique per ALB)."
   type        = number

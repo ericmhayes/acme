@@ -113,6 +113,45 @@ resource "aws_wafv2_web_acl" "this" {
     allow {}
   }
 
+  # Rate-based protection on the patient-facing booking path (abuse / scraping).
+  rule {
+    name     = "rate-limit-booking"
+    priority = 0
+
+    action {
+      block {}
+    }
+
+    statement {
+      rate_based_statement {
+        limit              = var.booking_rate_limit
+        aggregate_key_type = "IP"
+
+        scope_down_statement {
+          byte_match_statement {
+            positional_constraint = "STARTS_WITH"
+            search_string         = var.booking_path_prefix
+
+            field_to_match {
+              uri_path {}
+            }
+
+            text_transformation {
+              priority = 0
+              type     = "LOWERCASE"
+            }
+          }
+        }
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.name_prefix}-rate-limit-booking"
+      sampled_requests_enabled   = true
+    }
+  }
+
   dynamic "rule" {
     for_each = local.managed_rule_groups
 

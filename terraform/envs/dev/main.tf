@@ -131,6 +131,7 @@ module "api" {
 
   datadog_api_key_secret_arn = module.secrets.datadog_api_key_secret_arn
   log_retention_days         = var.log_retention_days
+  enable_scheduled_scaling   = true
   tags                       = var.tags
 }
 
@@ -161,6 +162,7 @@ module "web" {
 
   datadog_api_key_secret_arn = module.secrets.datadog_api_key_secret_arn
   log_retention_days         = var.log_retention_days
+  enable_scheduled_scaling   = true
   tags                       = var.tags
 }
 
@@ -191,6 +193,7 @@ module "worker" {
 
   datadog_api_key_secret_arn = module.secrets.datadog_api_key_secret_arn
   log_retention_days         = var.log_retention_days
+  enable_scheduled_scaling   = true
   tags                       = var.tags
 }
 

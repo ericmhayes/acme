@@ -41,10 +41,10 @@ jobs:
       - name: tflint
         run: tflint --recursive --chdir=terraform
 
-      - name: Checkov security scan
-        uses: bridgecrewio/checkov-action@v12
+      - name: tfsec security scan
+        uses: aquasecurity/tfsec-action@v1.0.3
         with:
-          directory: terraform
+          working_directory: terraform
           soft_fail: true
 
       - name: Set up Infracost

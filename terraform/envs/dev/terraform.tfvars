@@ -16,6 +16,9 @@ public_subnet_cidrs  = ["10.10.0.0/20", "10.10.16.0/20"]
 private_subnet_cidrs = ["10.10.128.0/20", "10.10.144.0/20"]
 nat_gateway_count    = 1
 
+# WAF disabled in dev (enabled in staging and prod)
+enable_waf = false
+
 # Secrets
 secret_recovery_window_days = 0
 

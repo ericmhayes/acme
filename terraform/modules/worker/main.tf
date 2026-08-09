@@ -11,6 +11,7 @@ data "aws_region" "current" {}
 locals {
   app_environment = [for k, v in var.environment_variables : { name = k, value = v }]
   app_secrets     = [for k, v in var.secret_arns : { name = k, valueFrom = v }]
+  cluster_name    = element(split("/", var.cluster_arn), length(split("/", var.cluster_arn)) - 1)
 }
 
 # --- Queues ---
@@ -211,10 +212,60 @@ resource "aws_ecs_service" "this" {
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
 
+  # Roll back automatically if a new deployment fails to stabilize.
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true
+  }
+
   network_configuration {
     subnets          = var.private_subnet_ids
     security_groups  = [aws_security_group.worker.id]
     assign_public_ip = false
+  }
+}
+
+# --- Scheduled scale-to-zero (cost, non-prod). Scheduled, not load-reactive. ---
+
+resource "aws_appautoscaling_target" "this" {
+  count = var.enable_scheduled_scaling ? 1 : 0
+
+  max_capacity       = var.desired_count
+  min_capacity       = 0
+  resource_id        = "service/${local.cluster_name}/${aws_ecs_service.this.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_scheduled_action" "scale_up" {
+  count = var.enable_scheduled_scaling ? 1 : 0
+
+  name               = "${var.name_prefix}-worker-scale-up"
+  service_namespace  = aws_appautoscaling_target.this[0].service_namespace
+  resource_id        = aws_appautoscaling_target.this[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.this[0].scalable_dimension
+  schedule           = var.scale_up_cron
+  timezone           = var.scale_timezone
+
+  scalable_target_action {
+    min_capacity = var.desired_count
+    max_capacity = var.desired_count
+  }
+}
+
+resource "aws_appautoscaling_scheduled_action" "scale_down" {
+  count = var.enable_scheduled_scaling ? 1 : 0
+
+  name               = "${var.name_prefix}-worker-scale-down"
+  service_namespace  = aws_appautoscaling_target.this[0].service_namespace
+  resource_id        = aws_appautoscaling_target.this[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.this[0].scalable_dimension
+  schedule           = var.scale_down_cron
+  timezone           = var.scale_timezone
+
+  scalable_target_action {
+    min_capacity = 0
+    max_capacity = 0
   }
 }
 

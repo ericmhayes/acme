@@ -55,6 +55,12 @@ jobs:
           role-to-assume: arn:aws:iam::123456789012:role/acme-staging-gha-tf-apply
           aws-region: ${{ env.AWS_REGION }}
 
+      # Migrations run as a discrete step before rolling services, against this
+      # environment's database. The migration command is owned by the app image.
+      - name: Run database migrations
+        run: |
+          echo "aws ecs run-task --cluster <cluster> --task-definition <migrate-task> ..."
+
       - name: Roll ECS services
         run: |
           for svc in api web worker; do
@@ -74,6 +80,12 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::210987654321:role/acme-prod-gha-tf-apply
           aws-region: ${{ env.AWS_REGION }}
+
+      # Migrations run as a discrete step before rolling services, against this
+      # environment's database. The migration command is owned by the app image.
+      - name: Run database migrations
+        run: |
+          echo "aws ecs run-task --cluster <cluster> --task-definition <migrate-task> ..."
 
       - name: Roll ECS services
         run: |

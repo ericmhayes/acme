@@ -108,6 +108,30 @@ variable "log_retention_days" {
   default     = 90
 }
 
+variable "enable_scheduled_scaling" {
+  description = "Scale the service to zero outside working hours on a schedule (used in dev for cost). This is scheduled, not load-reactive, scaling."
+  type        = bool
+  default     = false
+}
+
+variable "scale_up_cron" {
+  description = "Cron for scaling up to desired_count (in scale_timezone)."
+  type        = string
+  default     = "cron(0 8 ? * MON-FRI *)"
+}
+
+variable "scale_down_cron" {
+  description = "Cron for scaling down to zero (in scale_timezone)."
+  type        = string
+  default     = "cron(0 19 ? * MON-FRI *)"
+}
+
+variable "scale_timezone" {
+  description = "IANA timezone for the scaling schedules."
+  type        = string
+  default     = "America/New_York"
+}
+
 variable "tags" {
   description = "Tags applied to all resources in this module."
   type        = map(string)

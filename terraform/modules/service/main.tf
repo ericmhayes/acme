@@ -8,4 +8,5 @@
 #   service; no autoscaling is configured (fixed desired_count) — deliberately
 #   right-sized for current volume.
 #
-# Implemented in Phase 3. Intentional stub defining the module boundary only.
+# TODO: implement. This file currently declares the module boundary only
+# (see variables.tf and outputs.tf for the interface).

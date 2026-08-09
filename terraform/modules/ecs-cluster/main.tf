@@ -4,4 +4,5 @@
 #   services; per-service task roles and definitions live in the service/worker
 #   modules, not here.
 #
-# Implemented in Phase 3. Intentional stub defining the module boundary only.
+# TODO: implement. This file currently declares the module boundary only
+# (see variables.tf and outputs.tf for the interface).

@@ -1,4 +1,4 @@
-# Contract outputs for the service module. Wired to real resources in Phase 3.
+# Contract outputs for the service module. Values are wired when the module is implemented.
 
 output "service_name" {
   description = "Name of the ECS service."

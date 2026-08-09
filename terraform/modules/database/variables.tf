@@ -19,8 +19,9 @@ variable "private_subnet_ids" {
 }
 
 variable "ingress_security_group_ids" {
-  description = "Security groups allowed to connect to Postgres (the app tasks)."
+  description = "Security groups allowed to connect to Postgres. Usually left empty; the app services attach their own ingress rules to avoid a dependency cycle."
   type        = list(string)
+  default     = []
 }
 
 variable "engine_version" {

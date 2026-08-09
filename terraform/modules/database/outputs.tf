@@ -1,26 +1,24 @@
-# Contract outputs for the database module. Wired to real resources in Phase 2.
-
 output "db_instance_arn" {
   description = "ARN of the RDS instance."
-  value       = null
+  value       = aws_db_instance.this.arn
 }
 
 output "db_endpoint" {
   description = "Connection endpoint (host:port) of the RDS instance."
-  value       = null
+  value       = aws_db_instance.this.endpoint
 }
 
 output "db_port" {
   description = "Port the database listens on."
-  value       = null
+  value       = aws_db_instance.this.port
 }
 
 output "db_security_group_id" {
   description = "Security group protecting the database."
-  value       = null
+  value       = aws_security_group.db.id
 }
 
 output "master_user_secret_arn" {
   description = "ARN of the RDS-managed master credentials secret in Secrets Manager."
-  value       = null
+  value       = aws_db_instance.this.master_user_secret[0].secret_arn
 }

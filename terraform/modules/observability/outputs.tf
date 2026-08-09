@@ -1,4 +1,4 @@
-# Contract outputs for the observability module. Wired to real resources in Phase 3.
+# Contract outputs for the observability module. Values are wired when the module is implemented.
 
 output "monitor_ids" {
   description = "Map of logical monitor name to its Datadog monitor ID."

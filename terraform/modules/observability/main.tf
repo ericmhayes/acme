@@ -7,4 +7,5 @@
 #   This module owns Datadog resources only; it does not create the CloudWatch
 #   substrate, which the AWS resources emit natively.
 #
-# Implemented in Phase 3. Intentional stub defining the module boundary only.
+# TODO: implement. This file currently declares the module boundary only
+# (see variables.tf and outputs.tf for the interface).

@@ -1,4 +1,4 @@
-# Contract outputs for the ecs-cluster module. Wired to real resources in Phase 3.
+# Contract outputs for the ecs-cluster module. Values are wired when the module is implemented.
 
 output "cluster_id" {
   description = "ID of the ECS cluster."

@@ -6,4 +6,5 @@
 #   to the GitHub "prod" environment claim so it can only be assumed from an
 #   approved deployment. No long-lived access keys exist anywhere.
 #
-# Implemented in Phase 4. Intentional stub defining the module boundary only.
+# TODO: implement. This file currently declares the module boundary only
+# (see variables.tf and outputs.tf for the interface).

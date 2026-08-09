@@ -8,4 +8,5 @@
 #   the database stays the single source of truth. A Datadog agent sidecar ships
 #   metrics/APM.
 #
-# Implemented in Phase 3. Intentional stub defining the module boundary only.
+# TODO: implement. This file currently declares the module boundary only
+# (see variables.tf and outputs.tf for the interface).

@@ -1,4 +1,4 @@
-# Contract outputs for the alb module. Wired to real resources in Phase 3.
+# Contract outputs for the alb module. Values are wired when the module is implemented.
 
 output "alb_arn" {
   description = "ARN of the Application Load Balancer."

@@ -9,3 +9,20 @@ tags = {
   ManagedBy   = "terraform"
   Owner       = "infra"
 }
+
+# Networking
+vpc_cidr             = "10.10.0.0/16"
+public_subnet_cidrs  = ["10.10.0.0/20", "10.10.16.0/20"]
+private_subnet_cidrs = ["10.10.128.0/20", "10.10.144.0/20"]
+nat_gateway_count    = 1
+
+# Secrets
+secret_recovery_window_days = 0
+
+# Database
+db_instance_class        = "db.t4g.small"
+db_allocated_storage     = 20
+db_max_allocated_storage = 100
+db_multi_az              = false
+db_backup_retention_days = 7
+db_deletion_protection   = false

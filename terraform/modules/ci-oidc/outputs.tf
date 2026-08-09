@@ -1,4 +1,4 @@
-# Contract outputs for the ci-oidc module. Wired to real resources in Phase 4.
+# Contract outputs for the ci-oidc module. Values are wired when the module is implemented.
 
 output "oidc_provider_arn" {
   description = "ARN of the GitHub Actions IAM OIDC provider."

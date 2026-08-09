@@ -6,4 +6,5 @@
 #   listener is exported so each service can attach its own target group and
 #   host-header rule; the ALB does not own the target groups.
 #
-# Implemented in Phase 3. Intentional stub defining the module boundary only.
+# TODO: implement. This file currently declares the module boundary only
+# (see variables.tf and outputs.tf for the interface).

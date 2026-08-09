@@ -192,3 +192,17 @@ variable "datadog_enable_paging" {
   description = "Whether P1 monitors page (prod) or route to Slack only (non-prod)."
   type        = bool
 }
+
+# --- CI/CD ---
+
+variable "github_org" {
+  description = "GitHub organization or user that owns the infrastructure repo."
+  type        = string
+  default     = "ericmhayes"
+}
+
+variable "github_repo" {
+  description = "GitHub repository name."
+  type        = string
+  default     = "acme"
+}

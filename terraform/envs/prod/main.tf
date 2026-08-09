@@ -208,3 +208,19 @@ module "observability" {
   enable_paging               = var.datadog_enable_paging
   tags                        = ["env:${var.environment}", "project:acme"]
 }
+
+module "ci_oidc" {
+  source = "../../modules/ci-oidc"
+
+  name_prefix = var.name_prefix
+  environment = var.environment
+  github_org  = var.github_org
+  github_repo = var.github_repo
+
+  # prod is its own account and narrows the apply role to the "prod" GitHub
+  # environment, so it can only be assumed from an approved deployment.
+  create_oidc_provider   = true
+  prod_environment_claim = "prod"
+
+  tags = var.tags
+}

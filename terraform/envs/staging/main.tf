@@ -208,3 +208,18 @@ module "observability" {
   enable_paging               = var.datadog_enable_paging
   tags                        = ["env:${var.environment}", "project:acme"]
 }
+
+module "ci_oidc" {
+  source = "../../modules/ci-oidc"
+
+  name_prefix = var.name_prefix
+  environment = var.environment
+  github_org  = var.github_org
+  github_repo = var.github_repo
+
+  # staging reuses the OIDC provider dev created in the shared non-prod account.
+  create_oidc_provider   = false
+  prod_environment_claim = ""
+
+  tags = var.tags
+}

@@ -1,0 +1,48 @@
+# Digger (backendless mode) — orchestrates Terraform plan-on-PR and apply-on-merge.
+# One project per environment root. Prod uses a dedicated workflow whose apply is
+# gated by the "prod" GitHub Environment (required reviewers) in the workflow file.
+#
+# NOTE: Digger's config surface has shifted across releases (OpenTaco rebrand).
+# Keep this minimal and verify field names against the current Digger docs before
+# relying on advanced behaviour.
+
+telemetry: false
+
+projects:
+  - name: dev
+    dir: terraform/envs/dev
+    workflow: nonprod
+  - name: staging
+    dir: terraform/envs/staging
+    workflow: nonprod
+  - name: prod
+    dir: terraform/envs/prod
+    workflow: prod
+
+workflows:
+  nonprod:
+    plan:
+      steps:
+        - init
+        - plan
+    apply:
+      steps:
+        - init
+        - apply
+    workflow_configuration:
+      on_pull_request_pushed: [digger plan]
+      on_commit_to_default: [digger apply]
+
+  prod:
+    plan:
+      steps:
+        - init
+        - plan
+    apply:
+      steps:
+        - init
+        - apply
+    workflow_configuration:
+      on_pull_request_pushed: [digger plan]
+      # Prod apply is triggered manually after review, not automatically on merge.
+      on_commit_to_default: [digger plan]

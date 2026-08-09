@@ -1,0 +1,83 @@
+name: Build & Deploy
+
+# The application source lives in its own repository; this workflow shows the
+# delivery path into the infrastructure defined here. It builds a container
+# image, pushes it to ECR, then rolls the ECS services. Prod deploy is gated by
+# the "prod" GitHub Environment (required reviewers).
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag to build and deploy"
+        required: true
+        default: "latest"
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  build:
+    name: Build & push image
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ inputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (non-prod)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/acme-dev-gha-tf-apply
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Placeholder: the real build context comes from the application repo.
+      - name: Build and push
+        run: |
+          echo "docker build -t <ecr-repo>:${{ inputs.image_tag }} ."
+          echo "docker push <ecr-repo>:${{ inputs.image_tag }}"
+
+  deploy-staging:
+    name: Deploy to staging
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials (non-prod)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/acme-staging-gha-tf-apply
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Roll ECS services
+        run: |
+          for svc in api web worker; do
+            aws ecs update-service --cluster acme-staging-cluster \
+              --service "$svc" --force-new-deployment
+          done
+
+  deploy-prod:
+    name: Deploy to prod
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    # Manual approval gate: the "prod" environment requires reviewer sign-off.
+    environment: prod
+    steps:
+      - name: Configure AWS credentials (prod)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::210987654321:role/acme-prod-gha-tf-apply
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Roll ECS services
+        run: |
+          for svc in api web worker; do
+            aws ecs update-service --cluster acme-prod-cluster \
+              --service "$svc" --force-new-deployment
+          done

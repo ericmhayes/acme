@@ -1,16 +1,14 @@
-# Contract outputs for the ci-oidc module. Values are wired when the module is implemented.
-
 output "oidc_provider_arn" {
   description = "ARN of the GitHub Actions IAM OIDC provider."
-  value       = null
+  value       = local.provider_arn
 }
 
 output "plan_role_arn" {
   description = "ARN of the read-only Terraform plan role assumed on pull requests."
-  value       = null
+  value       = aws_iam_role.plan.arn
 }
 
 output "apply_role_arn" {
   description = "ARN of the Terraform apply role assumed on merge (gated in prod)."
-  value       = null
+  value       = aws_iam_role.apply.arn
 }

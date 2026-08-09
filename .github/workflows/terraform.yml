@@ -1,0 +1,76 @@
+name: Terraform
+
+on:
+  pull_request:
+    paths:
+      - "terraform/**"
+      - "digger.yml"
+      - ".github/workflows/terraform.yml"
+  push:
+    branches: [main]
+    paths:
+      - "terraform/**"
+
+# OIDC: no long-lived AWS keys. Digger needs PR write to post plans.
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+env:
+  AWS_REGION: us-east-1
+  # Placeholder account IDs — obviously fake. Replace per real accounts.
+  NONPROD_APPLY_ROLE: arn:aws:iam::123456789012:role/acme-dev-gha-tf-apply
+  NONPROD_PLAN_ROLE: arn:aws:iam::123456789012:role/acme-dev-gha-tf-plan
+
+jobs:
+  # Static analysis is advisory: it annotates findings but never blocks a merge,
+  # keeping it right-sized for a small team while still surfacing security issues.
+  lint-and-scan:
+    name: Lint & security scan (non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up tflint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: tflint
+        run: tflint --recursive --chdir=terraform
+
+      - name: Checkov security scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: terraform
+          soft_fail: true
+
+      - name: Set up Infracost
+        uses: infracost/actions/setup@v3
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Infracost breakdown (prod)
+        run: infracost breakdown --path=terraform/envs/prod --format=table
+
+  digger:
+    name: Digger (plan on PR / apply on merge)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # PRs assume the read-only plan role; merges to main assume apply.
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ github.event_name == 'pull_request' && env.NONPROD_PLAN_ROLE || env.NONPROD_APPLY_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Run Digger
+        uses: diggerhq/digger@vLatest
+        with:
+          setup-aws: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
